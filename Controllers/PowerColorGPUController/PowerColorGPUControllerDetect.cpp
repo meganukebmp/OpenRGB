@@ -26,7 +26,7 @@ void DetectPowerColorRedDevilGPUControllersV2(i2c_smbus_interface* bus, uint8_t 
     int ret = bus->i2c_smbus_read_i2c_block_data(i2c_addr, RED_DEVIL_V2_MAGIC_ADDR, 3, data);
     if(ret == 3 && memcmp(data, magic_v2, 3) == 0)
     {
-        PowerColorRedDevilV2Controller* controller         = new PowerColorRedDevilV2Controller(bus, i2c_addr);
+        PowerColorRedDevilV2Controller* controller         = new PowerColorRedDevilV2Controller(bus, i2c_addr, name);
         RGBController_PowerColorRedDevilV2* rgb_controller = new RGBController_PowerColorRedDevilV2(controller);
 
         ResourceManager::get()->RegisterRGBController(rgb_controller);

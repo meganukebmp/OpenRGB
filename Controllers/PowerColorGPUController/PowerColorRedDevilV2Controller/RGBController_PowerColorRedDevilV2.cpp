@@ -15,10 +15,12 @@
 #include "RGBController_PowerColorRedDevilV2.h"
 
 RGBController_PowerColorRedDevilV2::RGBController_PowerColorRedDevilV2(PowerColorRedDevilV2Controller* controller_ptr) {
-    name                        = "TEST NAME";
+    controller                  = controller_ptr;
+
+    name                        = controller->GetDeviceName();
     vendor                      = "PowerColor";
     description                 = "PowerColor Red Devil GPU Device";
-    location                    = "TEST LOCATION";
+    location                    = controller->GetDeviceLocation();
     type                        = DEVICE_TYPE_GPU;
 
     mode Off;
