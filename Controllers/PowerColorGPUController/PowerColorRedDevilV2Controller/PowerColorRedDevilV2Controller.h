@@ -66,9 +66,9 @@ enum
 
 enum
 {
-    RED_DEVIL_V2_SPEED_MIN               = 0x00,
+    RED_DEVIL_V2_SPEED_MIN               = 0xFF,
     RED_DEVIL_V2_SPEED_DEFAULT           = 0x32,
-    RED_DEVIL_V2_SPEED_MAX               = 0xFF
+    RED_DEVIL_V2_SPEED_MAX               = 0x00
 };
 
 
