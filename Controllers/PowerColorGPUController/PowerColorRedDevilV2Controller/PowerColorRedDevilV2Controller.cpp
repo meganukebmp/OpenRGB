@@ -78,6 +78,13 @@ red_devil_v2_mode PowerColorRedDevilV2Controller::GetMode()
 
 void PowerColorRedDevilV2Controller::SetMode(red_devil_v2_mode mode)
 {
+    if (mode.mode == RED_DEVIL_V2_MODE_SYNC) {
+        SetSync(true);
+        return;
+    }
+
+    SetSync(false);
+
     unsigned char data[3] = {
         mode.mode,
         mode.brightness,
