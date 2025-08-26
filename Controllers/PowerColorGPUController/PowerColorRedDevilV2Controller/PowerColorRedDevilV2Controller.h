@@ -91,11 +91,11 @@ public:
     void                            SetLedColor(int led, RGBColor color);
     void                            SetLedColorAll(RGBColor color);
 
+private:
+    i2c_smbus_interface*            bus;
+    red_devil_v2_dev_id             dev;
+    std::string                     name;
+
     int                             RegisterRead(unsigned char reg, unsigned char *data);
     int                             RegisterWrite(unsigned char reg, unsigned char *data);
-
-private:
-    i2c_smbus_interface*    bus;
-    red_devil_v2_dev_id     dev;
-    std::string             name;
 };

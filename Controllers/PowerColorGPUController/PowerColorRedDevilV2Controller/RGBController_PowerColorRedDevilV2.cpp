@@ -40,7 +40,22 @@ RGBController_PowerColorRedDevilV2::RGBController_PowerColorRedDevilV2(PowerColo
     Static.brightness           = RED_DEVIL_V2_BRIGHTNESS_MAX;
     modes.push_back(Static);
 
+    mode Breathing;
+    Breathing.name                 = "Breathing";
+    Breathing.value                = RED_DEVIL_V2_MODE_BREATHING;
+    Breathing.flags                = MODE_FLAG_HAS_SPEED | MODE_FLAG_HAS_PER_LED_COLOR | MODE_FLAG_HAS_BRIGHTNESS | MODE_FLAG_AUTOMATIC_SAVE;
+    Breathing.color_mode           = MODE_COLORS_PER_LED;
+    Breathing.brightness_min       = RED_DEVIL_V2_BRIGHTNESS_MIN;
+    Breathing.brightness_max       = RED_DEVIL_V2_BRIGHTNESS_MAX;
+    Breathing.brightness           = RED_DEVIL_V2_BRIGHTNESS_MAX;
+    Breathing.speed_min            = RED_DEVIL_V2_SPEED_MIN;
+    Breathing.speed_max            = RED_DEVIL_V2_SPEED_MAX;
+    Breathing.speed                = RED_DEVIL_V2_SPEED_DEFAULT;
+    modes.push_back(Breathing);
+
     SetupZones();
+
+    // Read config
 }
 
 RGBController_PowerColorRedDevilV2::~RGBController_PowerColorRedDevilV2() {
@@ -89,8 +104,9 @@ void RGBController_PowerColorRedDevilV2::UpdateSingleLED(int led) {
 
 void RGBController_PowerColorRedDevilV2::DeviceUpdateMode() {
     red_devil_v2_mode mode;
-    mode.mode = (unsigned char)modes[(unsigned int)active_mode].value;
-    mode.brightness = (unsigned char)modes[(unsigned int)active_mode].brightness;
+    mode.mode = (unsigned char)modes[active_mode].value;
+    mode.brightness = (unsigned char)modes[active_mode].brightness;
+    mode.speed = (unsigned char)modes[active_mode].speed;
 
     controller->SetMode(mode);
 }
