@@ -15,7 +15,6 @@
 #include "PowerColorRedDevilV2Controller/PowerColorRedDevilV2Controller.h"
 
 #define RED_DEVIL_V1_MAGIC_ADDR 0x90
-#define RED_DEVIL_V2_MAGIC_ADDR 0x82
 
 static const unsigned char magic_v1[3] = {0x01, 0x05, 0x00};
 static const unsigned char magic_v2[3] = {0x01, 0x32, 0x00};
@@ -23,7 +22,7 @@ static const unsigned char magic_v2[3] = {0x01, 0x32, 0x00};
 void DetectPowerColorRedDevilGPUControllersV2(i2c_smbus_interface* bus, uint8_t i2c_addr, const std::string& name)
 {
     unsigned char data[3];
-    int ret = bus->i2c_smbus_read_i2c_block_data(i2c_addr, RED_DEVIL_V2_MAGIC_ADDR, 3, data);
+    int ret = bus->i2c_smbus_read_i2c_block_data(i2c_addr, RED_DEVIL_V2_READ_REG_MAGIC, 3, data);
     if(ret == 3 && memcmp(data, magic_v2, 3) == 0)
     {
         PowerColorRedDevilV2Controller* controller         = new PowerColorRedDevilV2Controller(bus, i2c_addr, name);
