@@ -164,23 +164,74 @@ RGBController_PowerColorRedDevilV2::~RGBController_PowerColorRedDevilV2()
 
 void RGBController_PowerColorRedDevilV2::SetupZones()
 {
-    zone* new_zone = new zone();
-    led*  new_led  = new led();
+    zone stripe1;
+    stripe1.name                    = "Stripe 1";
+    stripe1.type                    = ZONE_TYPE_LINEAR;
+    stripe1.leds_min                = 3;
+    stripe1.leds_max                = 3;
+    stripe1.leds_count              = 3;
+    stripe1.matrix_map              = NULL;
+    zones.push_back(stripe1);
 
-    new_zone->name          = "GPU Zone";
-    new_zone->type          = ZONE_TYPE_SINGLE;
-    new_zone->leds_min      = 1;
-    new_zone->leds_max      = 1;
-    new_zone->leds_count    = 1;
-    new_zone->matrix_map    = NULL;
+    zone stripe2;
+    stripe2.name                    = "Stripe 2";
+    stripe2.type                    = ZONE_TYPE_LINEAR;
+    stripe2.leds_min                = 3;
+    stripe2.leds_max                = 3;
+    stripe2.leds_count              = 3;
+    stripe2.matrix_map              = NULL;
+    zones.push_back(stripe2);
 
-    new_led->name           = "GPU LED";
+    static unsigned int hellstone_map[2][7] =
+    {
+        {  0,  1,  2,  3,  4,  5,  6 },
+        { 13, 12, 11, 10,  9,  8,  7 }
+    };
 
-    /*---------------------------------------------------------*\
-    | Push the zone and LED on to device vectors                |
-    \*---------------------------------------------------------*/
-    leds.push_back(*new_led);
-    zones.push_back(*new_zone);
+    zone hellstone;
+    hellstone.name                  = "Hellstone";
+    hellstone.type                  = ZONE_TYPE_MATRIX;
+    hellstone.leds_min              = 14;
+    hellstone.leds_max              = 14;
+    hellstone.leds_count            = 14;
+    hellstone.matrix_map            = new matrix_map_type;
+    hellstone.matrix_map->height    = 2;
+    hellstone.matrix_map->width     = 7;
+    hellstone.matrix_map->map       = (unsigned int *)hellstone_map;
+    zones.push_back(hellstone);
+
+    zone devil;
+    devil.name                      = "Devil";
+    devil.type                      = ZONE_TYPE_LINEAR;
+    devil.leds_min                  = 4;
+    devil.leds_max                  = 4;
+    devil.leds_count                = 4;
+    devil.matrix_map                = NULL;
+    zones.push_back(devil);
+
+    for (unsigned int i = 0; i < stripe1.leds_count; i++) {
+        led new_led;
+        new_led.name = stripe1.name + " " + std::to_string(i+1);
+        leds.push_back(new_led);
+    }
+
+    for (unsigned int i = 0; i < stripe2.leds_count; i++) {
+        led new_led;
+        new_led.name = stripe2.name + " " + std::to_string(i+1);
+        leds.push_back(new_led);
+    }
+
+    for (unsigned int i = 0; i < hellstone.leds_count; i++) {
+        led new_led;
+        new_led.name = hellstone.name + " " + std::to_string(i+1);
+        leds.push_back(new_led);
+    }
+
+    for (unsigned int i = 0; i < devil.leds_count; i++) {
+        led new_led;
+        new_led.name = devil.name + " " + std::to_string(i+1);
+        leds.push_back(new_led);
+    }
 
     SetupColors();
 }
@@ -192,6 +243,8 @@ void RGBController_PowerColorRedDevilV2::ResizeZone(int zone, int new_size)
 
 void RGBController_PowerColorRedDevilV2::DeviceUpdateLEDs()
 {
+    // TODO: detect changes and set only changed parts
+    // TODO: handle single color force set
     RGBColor      color = colors[0];
 
     controller->SetLedColorAll(color);
