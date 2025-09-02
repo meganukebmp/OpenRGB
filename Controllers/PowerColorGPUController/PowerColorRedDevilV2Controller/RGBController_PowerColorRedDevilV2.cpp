@@ -261,26 +261,36 @@ void RGBController_PowerColorRedDevilV2::DeviceUpdateLEDs()
     | Check if all colors are identical. If they are do a       |
     | single register write instead of writing to each LED      |
     \*---------------------------------------------------------*/
+    bool all_same = true;
     for (int i = 1; i < colors.size(); i++)
     {
         if (colors[i-1] != colors[i])
         {
-            RGBColor color = colors[0];
-            controller->SetLedColorAll(color);
-            colors_copy = colors;
-            return;
+            all_same = false;
+            break;
         }
     }
 
     /*---------------------------------------------------------*\
-    | Since writing to each LED is slow check which colors have |
-    | changed and only write those instead                      |
+    | Do single register write to set all                       |
     \*---------------------------------------------------------*/
-    for (int i = 0; i < colors.size(); i++)
+    if (all_same)
     {
-        if (colors[i] != colors_copy[i])
+        RGBColor color = colors[0];
+        controller->SetLedColorAll(color);
+    }
+    else
+    {
+        /*---------------------------------------------------------*\
+        | Since writing to each LED is slow check which colors have |
+        | changed and only write those instead                      |
+        \*---------------------------------------------------------*/
+        for (int i = 0; i < colors.size(); i++)
         {
-            controller->SetLedColor(i, colors[i]);
+            if (colors[i] != colors_copy[i])
+            {
+                controller->SetLedColor(i, colors[i]);
+            }
         }
     }
 
