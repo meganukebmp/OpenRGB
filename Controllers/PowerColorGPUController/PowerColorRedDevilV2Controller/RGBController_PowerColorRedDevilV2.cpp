@@ -154,7 +154,12 @@ RGBController_PowerColorRedDevilV2::RGBController_PowerColorRedDevilV2(PowerColo
 
     SetupZones();
 
-    // Read config
+    ReadConfig();
+
+    /*------------------------------------------------------------------*\
+    | Copy the read colors for later delta-ing                           |
+    \*------------------------------------------------------------------*/
+    colors_copy = colors;
 }
 
 RGBController_PowerColorRedDevilV2::~RGBController_PowerColorRedDevilV2()
@@ -209,25 +214,32 @@ void RGBController_PowerColorRedDevilV2::SetupZones()
     devil.matrix_map                = NULL;
     zones.push_back(devil);
 
-    for (unsigned int i = 0; i < stripe1.leds_count; i++) {
+    /*------------------------------------------------------------------*\
+    | Create the LEDs for each zone                                      |
+    \*------------------------------------------------------------------*/
+    for (unsigned int i = 0; i < stripe1.leds_count; i++)
+    {
         led new_led;
         new_led.name = stripe1.name + " " + std::to_string(i+1);
         leds.push_back(new_led);
     }
 
-    for (unsigned int i = 0; i < stripe2.leds_count; i++) {
+    for (unsigned int i = 0; i < stripe2.leds_count; i++)
+    {
         led new_led;
         new_led.name = stripe2.name + " " + std::to_string(i+1);
         leds.push_back(new_led);
     }
 
-    for (unsigned int i = 0; i < hellstone.leds_count; i++) {
+    for (unsigned int i = 0; i < hellstone.leds_count; i++)
+    {
         led new_led;
         new_led.name = hellstone.name + " " + std::to_string(i+1);
         leds.push_back(new_led);
     }
 
-    for (unsigned int i = 0; i < devil.leds_count; i++) {
+    for (unsigned int i = 0; i < devil.leds_count; i++)
+    {
         led new_led;
         new_led.name = devil.name + " " + std::to_string(i+1);
         leds.push_back(new_led);
@@ -236,26 +248,54 @@ void RGBController_PowerColorRedDevilV2::SetupZones()
     SetupColors();
 }
 
-void RGBController_PowerColorRedDevilV2::ResizeZone(int zone, int new_size)
+void RGBController_PowerColorRedDevilV2::ResizeZone(int, int)
 {
-
+    /*---------------------------------------------------------*\
+    | This device does not support resizing zones               |
+    \*---------------------------------------------------------*/
 }
 
 void RGBController_PowerColorRedDevilV2::DeviceUpdateLEDs()
 {
-    // TODO: detect changes and set only changed parts
-    // TODO: handle single color force set
-    RGBColor      color = colors[0];
+    /*---------------------------------------------------------*\
+    | Check if all colors are identical. If they are do a       |
+    | single register write instead of writing to each LED      |
+    \*---------------------------------------------------------*/
+    for (int i = 1; i < colors.size(); i++)
+    {
+        if (colors[i-1] != colors[i])
+        {
+            RGBColor color = colors[0];
+            controller->SetLedColorAll(color);
+            colors_copy = colors;
+            return;
+        }
+    }
 
-    controller->SetLedColorAll(color);
+    /*---------------------------------------------------------*\
+    | Since writing to each LED is slow check which colors have |
+    | changed and only write those instead                      |
+    \*---------------------------------------------------------*/
+    for (int i = 0; i < colors.size(); i++)
+    {
+        if (colors[i] != colors_copy[i])
+        {
+            controller->SetLedColor(i, colors[i]);
+        }
+    }
+
+    /*---------------------------------------------------------*\
+    | Store changed colors                                      |
+    \*---------------------------------------------------------*/
+    colors_copy = colors;
 }
 
-void RGBController_PowerColorRedDevilV2::UpdateZoneLEDs(int zone)
+void RGBController_PowerColorRedDevilV2::UpdateZoneLEDs(int)
 {
     DeviceUpdateLEDs();
 }
 
-void RGBController_PowerColorRedDevilV2::UpdateSingleLED(int led)
+void RGBController_PowerColorRedDevilV2::UpdateSingleLED(int)
 {
     DeviceUpdateLEDs();
 }
@@ -268,4 +308,34 @@ void RGBController_PowerColorRedDevilV2::DeviceUpdateMode()
     mode.speed = (unsigned char)modes[active_mode].speed;
 
     controller->SetMode(mode);
+}
+
+void RGBController_PowerColorRedDevilV2::ReadConfig()
+{
+    red_devil_v2_mode mode = controller->GetMode();
+    bool sync = controller->GetSync();
+
+    for (int i = 0; i < colors.size(); i++)
+    {
+        colors[i] = controller->GetLedColor(i);
+    }
+
+    /*---------------------------------------------------------*\
+    | Since Sync is not actually "a mode" it needs special      |
+    | handling                                                  |
+    \*---------------------------------------------------------*/
+    if (sync)
+    {
+        active_mode = 10;
+    }
+    else if (mode.mode < modes.size() - 1)
+    {
+        /*---------------------------------------------------------*\
+        | Mode ordering is important, keep them in order            |
+        \*---------------------------------------------------------*/
+        active_mode = mode.mode;
+    }
+
+    modes[active_mode].brightness = mode.brightness;
+    modes[active_mode].speed = mode.speed;
 }

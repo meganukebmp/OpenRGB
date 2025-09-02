@@ -62,6 +62,9 @@ void PowerColorRedDevilV2Controller::SetSync(bool sync)
     }
 }
 
+/*------------------------------------------------------------------*\
+| Mode returns MMBBSS                                                |
+\*------------------------------------------------------------------*/
 red_devil_v2_mode PowerColorRedDevilV2Controller::GetMode()
 {
     unsigned char data[3];
@@ -96,6 +99,13 @@ void PowerColorRedDevilV2Controller::SetMode(red_devil_v2_mode mode)
 
 RGBColor PowerColorRedDevilV2Controller::GetLedColor(int led)
 {
+    /*------------------------------------------------------------------*\
+    | On overflow read the firs LED                                      |
+    \*------------------------------------------------------------------*/
+    if (led >= RED_DEVIL_V2_NUM_LEDS) {
+        led = 0;
+    }
+
     unsigned char data[3];
     RegisterRead(RED_DEVIL_V2_READ_REG_RGBX + led, data);
 
@@ -104,6 +114,13 @@ RGBColor PowerColorRedDevilV2Controller::GetLedColor(int led)
 
 void PowerColorRedDevilV2Controller::SetLedColor(int led, RGBColor color)
 {
+    /*------------------------------------------------------------------*\
+    | Skip writing to invalid LEDs                                       |
+    \*------------------------------------------------------------------*/
+    if (led >= RED_DEVIL_V2_NUM_LEDS) {
+        return;
+    }
+
     unsigned char data[3] = {
         (unsigned char) RGBGetRValue(color),
         (unsigned char) RGBGetGValue(color),
@@ -121,7 +138,10 @@ void PowerColorRedDevilV2Controller::SetLedColorAll(RGBColor color)
         (unsigned char) RGBGetBValue(color)
     };
 
-    // Need to write both
+    /*------------------------------------------------------------------*\
+    | Factory firmware writes both, but we only need 1 of them.          |
+    | Write both anyways just in case...                                 |
+    \*------------------------------------------------------------------*/
     RegisterWrite(RED_DEVIL_V2_WRITE_REG_RGB1, data);
     RegisterWrite(RED_DEVIL_V2_WRITE_REG_RGB2, data);
 }

@@ -22,14 +22,21 @@ public:
 
     void        SetupZones();
 
-    void        ResizeZone(int zone, int new_size);
+    void        ResizeZone(int, int);
 
     void        DeviceUpdateLEDs();
-    void        UpdateZoneLEDs(int zone);
-    void        UpdateSingleLED(int led);
+    void        UpdateZoneLEDs(int);
+    void        UpdateSingleLED(int);
 
     void        DeviceUpdateMode();
 
 private:
-    PowerColorRedDevilV2Controller* controller;
+    PowerColorRedDevilV2Controller      *controller;
+    /*------------------------------------------------------------------*\
+    | To optimize color writes we store a copy of the colors in order to |
+    | later only write changed colors                                    |
+    \*------------------------------------------------------------------*/
+    std::vector<RGBColor>               colors_copy;
+
+    void        ReadConfig();
 };
